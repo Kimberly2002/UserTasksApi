@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using UserTasksApi.Data;
+using UserTasksApi.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +14,10 @@ builder.Services.AddDbContext<UserTasksContext>(options => options.UseSqlite("Da
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<ITaskRepository, TaskRepository>();
+
 
 var app = builder.Build();
 
