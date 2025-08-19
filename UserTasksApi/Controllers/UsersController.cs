@@ -7,75 +7,59 @@ namespace UserTasksApi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class TasksController : ControllerBase
+    public class UsersController : ControllerBase
     {
         private readonly UserTasksContext _context;
 
-        public TasksController(UserTasksContext context)
+        public UsersController(UserTasksContext context)
         {
             _context = context;
         }
 
-        // GET: api/tasks
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<TaskItem>>> GetTasks()
+        public async Task<ActionResult<IEnumerable<User>>> GetUsers()
         {
-            // Include Assignee details
-            return await _context.Tasks.Include(t => t.Assignee).ToListAsync();
+            return await _context.Users.ToListAsync();
         }
 
-        // GET: api/tasks/{id}
         [HttpGet("{id}")]
-        public async Task<ActionResult<TaskItem>> GetTask(int id)
+        public async Task<ActionResult<User>> GetUser(int id)
         {
-            var task = await _context.Tasks.Include(t => t.Assignee)
-                                           .FirstOrDefaultAsync(t => t.Id == id);
-
-            if (task == null) return NotFound();
-            return task;
+            var user = await _context.Users.FindAsync(id);
+            if (user == null) return NotFound();
+            return user;
         }
 
-        // POST: api/tasks
         [HttpPost]
-        public async Task<ActionResult<TaskItem>> CreateTask(TaskItem task)
+        public async Task<ActionResult<User>> CreateUser(User user)
         {
-            // Optional: check if assigned user exists
-            var user = await _context.Users.FindAsync(task.AssigneeId);
-            if (user == null) return BadRequest("Assignee not found.");
-
-            _context.Tasks.Add(task);
+            _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            // Return task with Assignee included
-            await _context.Entry(task).Reference(t => t.Assignee).LoadAsync();
-
-            return CreatedAtAction(nameof(GetTask), new { id = task.Id }, task);
+            return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
         }
 
-        // PUT: api/tasks/{id}
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateTask(int id, TaskItem updatedTask)
+        public async Task<IActionResult> UpdateUser(int id, User updatedUser)
         {
-            var task = await _context.Tasks.FindAsync(id);
-            if (task == null) return NotFound();
+            var user = await _context.Users.FindAsync(id);
+            if (user == null) return NotFound();
 
-            task.Title = updatedTask.Title;
-            task.Description = updatedTask.Description;
-            task.AssigneeId = updatedTask.AssigneeId;
-            task.DueDate = updatedTask.DueDate;
+            user.Username = updatedUser.Username;
+            user.Email = updatedUser.Email;
+            user.Password = updatedUser.Password;
 
             await _context.SaveChangesAsync();
             return NoContent();
         }
 
-        // DELETE: api/tasks/{id}
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteTask(int id)
+        public async Task<IActionResult> DeleteUser(int id)
         {
-            var task = await _context.Tasks.FindAsync(id);
-            if (task == null) return NotFound();
+            var user = await _context.Users.FindAsync(id);
+            if (user == null) return NotFound();
 
-            _context.Tasks.Remove(task);
+            _context.Users.Remove(user);
             await _context.SaveChangesAsync();
             return NoContent();
         }
