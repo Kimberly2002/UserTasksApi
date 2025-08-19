@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using System.Reflection;
 using UserTasksApi.Data;
 using UserTasksApi.Repositories;
 
@@ -20,6 +21,13 @@ builder.Services.AddScoped<ITaskRepository, TaskRepository>();
 
 
 var app = builder.Build();
+
+builder.Services.AddSwaggerGen(options =>
+{
+    // Add XML comments path
+    var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+});
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

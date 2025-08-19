@@ -4,6 +4,7 @@ using UserTasksApi.Repositories;
 
 namespace UserTasksApi.Controllers
 {
+
     [ApiController]
     [Route("api/[controller]")]
     public class TasksController : ControllerBase
@@ -17,7 +18,7 @@ namespace UserTasksApi.Controllers
             _userRepository = userRepository;
         }
 
-        //Get all tasks
+       
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TaskItem>>> GetTasks()
         {
@@ -25,7 +26,6 @@ namespace UserTasksApi.Controllers
             return Ok(tasks);
         }
 
-        //Get task by Id
         [HttpGet("{id}")]
         public async Task<ActionResult<TaskItem>> GetTask(int id)
         {
@@ -34,7 +34,6 @@ namespace UserTasksApi.Controllers
             return Ok(task);
         }
 
-        //Create new task
         [HttpPost]
         public async Task<ActionResult<TaskItem>> CreateTask(TaskItem task)
         {
@@ -45,7 +44,6 @@ namespace UserTasksApi.Controllers
             return CreatedAtAction(nameof(GetTask), new { id = createdTask.Id }, createdTask);
         }
 
-        //Update task
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateTask(int id, TaskItem updatedTask)
         {
@@ -61,7 +59,6 @@ namespace UserTasksApi.Controllers
             return NoContent();
         }
 
-        //Delete task
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTask(int id)
         {
@@ -72,7 +69,6 @@ namespace UserTasksApi.Controllers
             return NoContent();
         }
 
-       // Get all expired tasks
         [HttpGet("expired")]
         public async Task<ActionResult<IEnumerable<TaskItem>>> GetExpiredTasks()
         {
@@ -81,7 +77,7 @@ namespace UserTasksApi.Controllers
             return Ok(expired);
         }
 
-        // Get all active tasks 
+        
         [HttpGet("active")]
         public async Task<ActionResult<IEnumerable<TaskItem>>> GetActiveTasks()
         {
@@ -90,7 +86,7 @@ namespace UserTasksApi.Controllers
             return Ok(active);
         }
 
-        // Get tasks by user
+        
         [HttpGet("byuser/{userId}")]
         public async Task<ActionResult<IEnumerable<TaskItem>>> GetTasksByUser(int userId)
         {
@@ -99,7 +95,6 @@ namespace UserTasksApi.Controllers
             return Ok(userTasks);
         }
 
-        // Get tasks by date
         [HttpGet("bydate/{date}")]
         public async Task<ActionResult<IEnumerable<TaskItem>>> GetTasksByDate(DateTime date)
         {
