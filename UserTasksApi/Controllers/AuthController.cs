@@ -6,6 +6,8 @@ using System.Security.Claims;
 using System.Text;
 using UserTasksApi.Models;
 using UserTasksApi.Repositories;
+using BCrypt.Net;
+
 
 namespace UserTasksApi.Controllers
 {
@@ -22,14 +24,38 @@ namespace UserTasksApi.Controllers
             _configuration = configuration;
         }
 
-        // POST: api/Auth/login
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] LoginRequest request)
+        {
+            if (string.IsNullOrEmpty(request.Email) || string.IsNullOrEmpty(request.Password))
+                return BadRequest("Email and password are required.");
+
+            // Check if user already exists
+            var existingUser = await _userRepository.GetByEmailAsync(request.Email);
+            if (existingUser != null)
+                return BadRequest("User already exists.");
+
+            // Create a new user
+            var user = new User
+            {
+                Email = request.Email,
+                // or request username if added
+                Username = request.Email, 
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password)
+            };
+
+            await _userRepository.AddUserAsync(user);
+
+            return Ok("User registered successfully.");
+        }
+
         [AllowAnonymous]
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest login)
         {
-            // Validate user credentials
-            var user = await _userRepository.GetByEmailAndPasswordAsync(login.Email, login.Password);
-            if (user == null)
+            var user = await _userRepository.GetByEmailAsync(login.Email);
+
+            if (user == null || !BCrypt.Net.BCrypt.Verify(login.Password, user.PasswordHash))
                 return Unauthorized("Invalid email or password.");
 
             // Generate JWT

@@ -4,7 +4,6 @@ using UserTasksApi.Models;
 
 namespace UserTasksApi.Repositories
 {
-    
     public class UserRepository : IUserRepository
     {
         private readonly UserTasksContext _context;
@@ -24,7 +23,7 @@ namespace UserTasksApi.Repositories
             return await _context.Users.FindAsync(id);
         }
 
-        public async Task<User> AddAsync(User user)
+        public async Task<User> AddUserAsync(User user)
         {
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
@@ -43,10 +42,19 @@ namespace UserTasksApi.Repositories
             await _context.SaveChangesAsync();
         }
 
+        public async Task<User?> GetByEmailAsync(string email)
+        {
+            return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+        }
+
         public async Task<User?> GetByEmailAndPasswordAsync(string email, string password)
         {
-            return await _context.Users
-                .FirstOrDefaultAsync(u => u.Email == email && u.Password == password);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+            if (user != null && BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
+            {
+                return user;
+            }
+            return null;
         }
     }
 }

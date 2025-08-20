@@ -8,7 +8,6 @@ namespace UserTasksApi.Controllers
     /// <summary>
     /// Controller for managing tasks.
     /// </summary>
-    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class TasksController : ControllerBase

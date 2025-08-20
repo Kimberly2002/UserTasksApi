@@ -3,13 +3,13 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using UserTasksApi.Models;
 using UserTasksApi.Repositories;
+using BCrypt.Net;
 
 namespace UserTasksApi.Controllers
 {
     /// <summary>
     /// Controller for managing users.
     /// </summary>
-    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class UsersController : ControllerBase
@@ -33,7 +33,6 @@ namespace UserTasksApi.Controllers
         /// <summary>
         /// Get a specific user by ID.
         /// </summary>
-        /// <param name="id">User ID</param>
         [HttpGet("{id}")]
         public async Task<ActionResult<User>> GetUser(int id)
         {
@@ -43,30 +42,38 @@ namespace UserTasksApi.Controllers
         }
 
         /// <summary>
-        /// Create a new user.
+        /// Create a new user (hashes password).
         /// </summary>
-        /// <param name="user">User details</param>
         [HttpPost]
-        public async Task<ActionResult<User>> CreateUser(User user)
+        public async Task<ActionResult<User>> CreateUser(UserDto userDto)
         {
-            var createdUser = await _userRepository.AddAsync(user);
+            var user = new User
+            {
+                Username = userDto.Username,
+                Email = userDto.Email,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(userDto.Password)
+            };
+
+            var createdUser = await _userRepository.AddUserAsync(user);
             return CreatedAtAction(nameof(GetUser), new { id = createdUser.Id }, createdUser);
         }
 
         /// <summary>
         /// Update an existing user.
         /// </summary>
-        /// <param name="id">User ID</param>
-        /// <param name="updatedUser">Updated user details</param>
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUser(int id, User updatedUser)
+        public async Task<IActionResult> UpdateUser(int id, UserDto userDto)
         {
             var user = await _userRepository.GetByIdAsync(id);
             if (user == null) return NotFound();
 
-            user.Username = updatedUser.Username;
-            user.Email = updatedUser.Email;
-            user.Password = updatedUser.Password;
+            user.Username = userDto.Username;
+            user.Email = userDto.Email;
+
+            if (!string.IsNullOrEmpty(userDto.Password))
+            {
+                user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(userDto.Password);
+            }
 
             await _userRepository.UpdateAsync(user);
             return NoContent();
@@ -75,7 +82,6 @@ namespace UserTasksApi.Controllers
         /// <summary>
         /// Delete a user by ID.
         /// </summary>
-        /// <param name="id">User ID</param>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
@@ -93,11 +99,9 @@ namespace UserTasksApi.Controllers
         /// <summary>
         /// Get all tasks assigned to a specific user.
         /// </summary>
-        /// <param name="id">User ID</param>
         [HttpGet("{id}/tasks")]
         public async Task<ActionResult<IEnumerable<TaskItem>>> GetUserTasks(int id)
         {
-            // Ensure users can only access their own tasks
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userIdClaim != id.ToString())
                 return Forbid("You can only access your own tasks.");

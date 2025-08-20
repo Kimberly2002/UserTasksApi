@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using UserTasksApi.Data;
 
@@ -10,9 +11,11 @@ using UserTasksApi.Data;
 namespace UserTasksApi.Migrations
 {
     [DbContext(typeof(UserTasksContext))]
-    partial class UserTasksContextModelSnapshot : ModelSnapshot
+    [Migration("20250820121436_AddPasswordHashToUsers")]
+    partial class AddPasswordHashToUsers
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.8");
