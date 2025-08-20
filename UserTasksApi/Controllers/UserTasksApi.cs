@@ -4,7 +4,9 @@ using UserTasksApi.Repositories;
 
 namespace UserTasksApi.Controllers
 {
-    // Controller for managing tasks.
+    /// <summary>
+    /// Controller for managing tasks.
+    /// </summary>
     [ApiController]
     [Route("api/[controller]")]
     public class TasksController : ControllerBase
@@ -18,15 +20,16 @@ namespace UserTasksApi.Controllers
             _userRepository = userRepository;
         }
 
-        // Get all tasks.
+        /// <summary>
+        /// Get all tasks.
+        /// </summary>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<TaskItem>>> GetTasks()
-        {
-            var tasks = await _taskRepository.GetAllAsync();
-            return Ok(tasks);
-        }
+        public async Task<ActionResult<IEnumerable<TaskItem>>> GetTasks() => Ok(await _taskRepository.GetAllAsync());
 
-        // Get a specific task by ID.
+        /// <summary>
+        /// Get a specific task by ID.
+        /// </summary>
+        /// <param name="id">Task ID</param>
         [HttpGet("{id}")]
         public async Task<ActionResult<TaskItem>> GetTask(int id)
         {
@@ -35,7 +38,10 @@ namespace UserTasksApi.Controllers
             return Ok(task);
         }
 
-        // Create a new task.
+        /// <summary>
+        /// Create a new task.
+        /// </summary>
+        /// <param name="task">Task details</param>
         [HttpPost]
         public async Task<ActionResult<TaskItem>> CreateTask(TaskItem task)
         {
@@ -46,7 +52,11 @@ namespace UserTasksApi.Controllers
             return CreatedAtAction(nameof(GetTask), new { id = createdTask.Id }, createdTask);
         }
 
-        // Update an existing task.
+        /// <summary>
+        /// Update an existing task.
+        /// </summary>
+        /// <param name="id">Task ID</param>
+        /// <param name="updatedTask">Updated task details</param>
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateTask(int id, TaskItem updatedTask)
         {
@@ -62,7 +72,10 @@ namespace UserTasksApi.Controllers
             return NoContent();
         }
 
-        // Delete a task by ID.
+        /// <summary>
+        /// Delete a task by ID.
+        /// </summary>
+        /// <param name="id">Task ID</param>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTask(int id)
         {
@@ -73,40 +86,46 @@ namespace UserTasksApi.Controllers
             return NoContent();
         }
 
-        // Get all expired tasks 
+        /// <summary>
+        /// Get all expired tasks (past due date).
+        /// </summary>
         [HttpGet("expired")]
         public async Task<ActionResult<IEnumerable<TaskItem>>> GetExpiredTasks()
         {
             var allTasks = await _taskRepository.GetAllAsync();
-            var expired = allTasks.Where(t => t.DueDate < DateTime.UtcNow).ToList();
-            return Ok(expired);
+            return Ok(allTasks.Where(t => t.DueDate < DateTime.UtcNow));
         }
 
-        // Get all active tasks
+        /// <summary>
+        /// Get all active tasks (not yet due).
+        /// </summary>
         [HttpGet("active")]
         public async Task<ActionResult<IEnumerable<TaskItem>>> GetActiveTasks()
         {
             var allTasks = await _taskRepository.GetAllAsync();
-            var active = allTasks.Where(t => t.DueDate >= DateTime.UtcNow).ToList();
-            return Ok(active);
+            return Ok(allTasks.Where(t => t.DueDate >= DateTime.UtcNow));
         }
 
-        // Get tasks assigned to a user.
+        /// <summary>
+        /// Get tasks assigned to a specific user.
+        /// </summary>
+        /// <param name="userId">User ID</param>
         [HttpGet("byuser/{userId}")]
         public async Task<ActionResult<IEnumerable<TaskItem>>> GetTasksByUser(int userId)
         {
             var allTasks = await _taskRepository.GetAllAsync();
-            var userTasks = allTasks.Where(t => t.AssigneeId == userId).ToList();
-            return Ok(userTasks);
+            return Ok(allTasks.Where(t => t.AssigneeId == userId));
         }
 
-        // Get tasks by a specific due date.
+        /// <summary>
+        /// Get tasks due on a specific date.
+        /// </summary>
+        /// <param name="date">Target date (yyyy-MM-dd)</param>
         [HttpGet("bydate/{date}")]
         public async Task<ActionResult<IEnumerable<TaskItem>>> GetTasksByDate(DateTime date)
         {
             var allTasks = await _taskRepository.GetAllAsync();
-            var tasksOnDate = allTasks.Where(t => t.DueDate.Date == date.Date).ToList();
-            return Ok(tasksOnDate);
+            return Ok(allTasks.Where(t => t.DueDate.Date == date.Date));
         }
     }
 }

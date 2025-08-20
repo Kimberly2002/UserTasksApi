@@ -4,7 +4,9 @@ using UserTasksApi.Repositories;
 
 namespace UserTasksApi.Controllers
 {
-    //Controller for managing users.
+    /// <summary>
+    /// Controller for managing users.
+    /// </summary>
     [ApiController]
     [Route("api/[controller]")]
     public class UsersController : ControllerBase
@@ -18,16 +20,16 @@ namespace UserTasksApi.Controllers
             _taskRepository = taskRepository;
         }
 
-        //Get all users.
+        /// <summary>
+        /// Get all users.
+        /// </summary>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<User>>> GetUsers()
-        {
-            var users = await _userRepository.GetAllAsync();
-            return Ok(users);
-        }
+        public async Task<ActionResult<IEnumerable<User>>> GetUsers() => Ok(await _userRepository.GetAllAsync());
 
-        
-        //Get a specific user by ID.
+        /// <summary>
+        /// Get a specific user by ID.
+        /// </summary>
+        /// <param name="id">User ID</param>
         [HttpGet("{id}")]
         public async Task<ActionResult<User>> GetUser(int id)
         {
@@ -36,15 +38,22 @@ namespace UserTasksApi.Controllers
             return Ok(user);
         }
 
-        //Create a new user.
+        /// <summary>
+        /// Create a new user.
+        /// </summary>
+        /// <param name="user">User details</param>
         [HttpPost]
         public async Task<ActionResult<User>> CreateUser(User user)
         {
             var createdUser = await _userRepository.AddAsync(user);
             return CreatedAtAction(nameof(GetUser), new { id = createdUser.Id }, createdUser);
         }
-               
-        //Update an existing user.
+
+        /// <summary>
+        /// Update an existing user.
+        /// </summary>
+        /// <param name="id">User ID</param>
+        /// <param name="updatedUser">Updated user details</param>
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUser(int id, User updatedUser)
         {
@@ -59,7 +68,10 @@ namespace UserTasksApi.Controllers
             return NoContent();
         }
 
-        //Delete a user by ID.
+        /// <summary>
+        /// Delete a user by ID.
+        /// </summary>
+        /// <param name="id">User ID</param>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
@@ -70,7 +82,10 @@ namespace UserTasksApi.Controllers
             return NoContent();
         }
 
-        /// Get all tasks assigned to user.
+        /// <summary>
+        /// Get all tasks assigned to a specific user.
+        /// </summary>
+        /// <param name="id">User ID</param>
         [HttpGet("{id}/tasks")]
         public async Task<ActionResult<IEnumerable<TaskItem>>> GetUserTasks(int id)
         {
@@ -78,9 +93,7 @@ namespace UserTasksApi.Controllers
             if (user == null) return NotFound();
 
             var allTasks = await _taskRepository.GetAllAsync();
-            var userTasks = allTasks.Where(t => t.AssigneeId == id).ToList();
-
-            return Ok(userTasks);
+            return Ok(allTasks.Where(t => t.AssigneeId == id));
         }
     }
 }
