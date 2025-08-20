@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using UserTasksApi.Models;
 using UserTasksApi.Repositories;
 
@@ -7,6 +8,7 @@ namespace UserTasksApi.Controllers
     /// <summary>
     /// Controller for managing tasks.
     /// </summary>
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class TasksController : ControllerBase
@@ -23,6 +25,7 @@ namespace UserTasksApi.Controllers
         /// <summary>
         /// Get all tasks.
         /// </summary>
+        [Authorize]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TaskItem>>> GetTasks() => Ok(await _taskRepository.GetAllAsync());
 

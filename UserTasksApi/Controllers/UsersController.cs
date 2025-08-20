@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using UserTasksApi.Models;
 using UserTasksApi.Repositories;
 
@@ -7,6 +9,7 @@ namespace UserTasksApi.Controllers
     /// <summary>
     /// Controller for managing users.
     /// </summary>
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class UsersController : ControllerBase
@@ -24,7 +27,8 @@ namespace UserTasksApi.Controllers
         /// Get all users.
         /// </summary>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<User>>> GetUsers() => Ok(await _userRepository.GetAllAsync());
+        public async Task<ActionResult<IEnumerable<User>>> GetUsers() =>
+            Ok(await _userRepository.GetAllAsync());
 
         /// <summary>
         /// Get a specific user by ID.
@@ -75,6 +79,10 @@ namespace UserTasksApi.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userIdClaim != id.ToString())
+                return Forbid("You can only delete your own account.");
+
             var user = await _userRepository.GetByIdAsync(id);
             if (user == null) return NotFound();
 
@@ -89,6 +97,11 @@ namespace UserTasksApi.Controllers
         [HttpGet("{id}/tasks")]
         public async Task<ActionResult<IEnumerable<TaskItem>>> GetUserTasks(int id)
         {
+            // Ensure users can only access their own tasks
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userIdClaim != id.ToString())
+                return Forbid("You can only access your own tasks.");
+
             var user = await _userRepository.GetByIdAsync(id);
             if (user == null) return NotFound();
 
